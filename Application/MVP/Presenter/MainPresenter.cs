@@ -43,7 +43,7 @@ namespace Application.MVP.Presenter
         protected virtual async Task OnDataLoad(object sender, EventArgs e)
         {
             _view.IsLoading = true;
-            _view.DebugText = "Loading data (presenter)";
+            _view.DebugText = "Loading data";
             await _model.LoadData(
                 "https://yastatic.net/market-export/_/partner/help/YML.xml");
         }
@@ -55,9 +55,9 @@ namespace Application.MVP.Presenter
                 _view.DebugText = "Invalid id";
             }
 
-            var intent = new Intent(_view.Activity, typeof(MainActivity));
-            intent.Extras?.PutString("OfferId", idStr);
-            intent.Extras?.PutString("OfferJson", offerJson);
+            var intent = new Intent(_view.Activity, typeof(OfferActivity));
+            intent.PutExtra("OfferId", idStr);
+            intent.PutExtra("OfferJson", offerJson);
             _view.Activity.StartActivity(intent);
         }
     }
