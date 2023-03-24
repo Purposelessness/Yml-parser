@@ -21,8 +21,8 @@ namespace Application.MVP.Model
             public Offer[]? OfferArray { get; set; }
         }
 
-        public event Action<string>? DebugAction = delegate { };
-        public event Action<string[]>? DataIsReady = delegate { };
+        public event Action<string> DebugAction = delegate { };
+        public event Action<string[]> DataIsReady = delegate { };
 
         private readonly Dictionary<int, Offer> _offerMap;
 
@@ -34,6 +34,7 @@ namespace Application.MVP.Model
 
         public async Task LoadData(string url)
         {
+            DebugAction("Preparing xml document");
             var document = new XmlDocument();
             try
             {
@@ -41,16 +42,18 @@ namespace Application.MVP.Model
             }
             catch (Exception ex)
             {
-                DebugAction?.Invoke(ex.Message);
+                DebugAction($"Exception: {ex.Message}");
                 return;
             }
 
+            DebugAction("Parsing xml document");
             var offersNode = document.SelectSingleNode("//offers");
             if (offersNode is null)
                 return;
 
             var offersNodeChildren = offersNode.ChildNodes;
 
+            DebugAction("Deserializing offer objects");
             var serializer = new XmlSerializer(typeof(Offers));
             using var reader = new StringReader(offersNode.OuterXml);
             var offers = (Offers?)serializer.Deserialize(reader);
@@ -58,6 +61,7 @@ namespace Application.MVP.Model
                 offers.OfferArray.Length != offersNodeChildren.Count)
                 return;
 
+            DebugAction("Serializing offers to json");
             var idData = new string[offersNodeChildren.Count];
             for (var i = 0; i < offersNodeChildren.Count; ++i)
             {
@@ -72,7 +76,7 @@ namespace Application.MVP.Model
                 idData[i] = offers.OfferArray[i].Id.ToString();
             }
 
-            DataIsReady?.Invoke(idData);
+            DataIsReady(idData);
         }
 
         public bool TryGetOffer(string idStr, out string? offerJson)
